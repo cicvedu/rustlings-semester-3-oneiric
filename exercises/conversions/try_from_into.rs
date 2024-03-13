@@ -27,7 +27,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
 
 // Your task is to complete this implementation and return an Ok result of inner
 // type Color. You need to create an implementation for a tuple of three
@@ -37,10 +36,42 @@ enum IntoColorError {
 // time, but the slice implementation needs to check the slice length! Also note
 // that correct RGB color values must be integers in the 0..=255 range.
 
+
+fn is_invalid(val : i16) -> bool {
+    if val < 0 || val > 255 {
+        return true;
+    }
+    false
+}
+
+fn is_invalid_tuple(tuple: &(i16, i16, i16)) -> bool {
+    if  is_invalid(tuple.0) ||
+        is_invalid(tuple.1) ||
+        is_invalid(tuple.2) {
+      return true;
+    }
+    false
+}
+
+fn create_color(tuple: &(i16, i16, i16)) -> Color {
+    Color {
+        red: tuple.0 as u8,
+        green: tuple.1 as u8,
+        blue: tuple.2 as u8
+    }
+}
+
 // Tuple implementation
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+
+        if is_invalid_tuple(&tuple) {
+            return Err(IntoColorError::IntConversion)
+           }
+
+        let color = create_color(&tuple);
+        Ok(color)
     }
 }
 
@@ -48,6 +79,14 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        
+        let tuple = (arr[0], arr[1], arr[2]);
+        if is_invalid_tuple(&tuple) {
+            return Err(IntoColorError::IntConversion)
+        }
+
+        let color = create_color(&tuple);
+        Ok(color)
     }
 }
 
@@ -55,6 +94,18 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen)
+        }
+
+        let tuple = (slice[0], slice[1], slice[2]);
+        if is_invalid_tuple(&tuple) {
+            return Err(IntoColorError::IntConversion)
+        }
+
+        let color = create_color(&tuple);
+        Ok(color)
     }
 }
 
